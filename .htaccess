@@ -1,0 +1,12 @@
+php_value post_max_size 128M
+php_value upload_max_filesize 128M
+
+RewriteEngine on
+RewriteCond $1 !^(index\.php)
+RewriteRule ^(.*)$ index.php/$1 [L]
+
+<IfModule mod_headers.c>
+    Header set Access-Control-Allow-Origin "*"
+    Header set Access-Control-Allow-Headers "X-Requested-With, Content-Type"
+</IfModule>
+

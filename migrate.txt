@@ -1,0 +1,29 @@
+/*
+|----------------------------------------------------------------------------------------
+| company
+|----------------------------------------------------------------------------------------
+| we need migrate.php.txt to update bilingual support for `summary` and `description`
+|
+*/
+INSERT INTO company (`code`,`name`,`summary`,`description`,`logo`,`address`,`phone`,`fax`,`email`,`website`,`established`,`listing`,`underwriter`,`sales_breakdown`,`group_name`,`featured`,`datecreate`) SELECT `exchange` AS `code`,`name`,`summary`,`description`,`image` AS `logo`,`address`,`phone`,`fax`,`email`,`website`,`established`,`listing`,`underwriter`,`sales_breakdown`,`group` AS `group_name`,`featured`, NOW() AS `datecreate` FROM idn.company ORDER BY exchange;
+/* end of company */
+
+
+
+/*
+|----------------------------------------------------------------------------------------
+| quote
+|----------------------------------------------------------------------------------------
+INSERT INTO quote (`code`,`previous_price`,`open_price`,`close_price`,`offer_price`,`bid_price`,`tradable_volume`,`tradable_value`,`total_frequency`,`capitalization`,`percentage_price`,`price_change`,`day_low`,`day_high`,`price_earning_ratio`,`earning_per_share`,`status`,`datecreate`) SELECT `exchange` AS `code`,`previous_price`,`open_price`,`close_price`,`offer_price`,`bid_price`,`tradable_volume`,`tradable_value`,`total_frequency`,`capitalization`,`percentage_price`,`price_change`,`day_low`,`day_high`,`price_earning_ratio`,`earning_per_share`,`status`, NOW() AS `datecreate` FROM idn.company ORDER BY exchange;
+/* end of quote */
+
+
+
+/*
+|----------------------------------------------------------------------------------------
+| company - industry constraint
+|----------------------------------------------------------------------------------------
+*/
+UPDATE company SET industry_id=(SELECT industry_id FROM idn.industry_assignment ia,idn.company c WHERE ia.company_id=c.id AND c.exchange=company.code)
+/* end of company - industry constraint */
+
