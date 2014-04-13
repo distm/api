@@ -66,10 +66,23 @@ class Company extends MY_Controller {
         $order = $this->input->get('order', TRUE);
         $sort  = $this->input->get('sort', TRUE);
         
-        $data = $this->company_model->companies($limit, $start, $order, $sort);
+		$search = trim($this->input->get('search', TRUE));
+		if(! empty($search))
+		{
+			// get companies list based on search keyword
+			$data = $this->company_model->search_companies($search, $limit, $start, $order, $sort);
+			$total = $this->company_model->total_companies(array('search'=>$search));
+		}
+		else
+		{
+			// get companies list based on limitation and order
+			$data = $this->company_model->companies($limit, $start, $order, $sort);
+			$total = $this->company_model->total_companies();
+		}
+		
         $this->response(array(
             'success' => (bool)$data,
-            'total' => $this->company_model->total_companies(),
+            'total' => (int)$total,
             'data' => $data
         ));
     }

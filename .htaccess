@@ -2,7 +2,7 @@ php_value post_max_size 128M
 php_value upload_max_filesize 128M
 
 RewriteEngine on
-RewriteCond $1 !^(index\.php)
+RewriteCond $1 !^(index\.php|migrate\.php)
 RewriteRule ^(.*)$ index.php/$1 [L]
 
 <IfModule mod_headers.c>

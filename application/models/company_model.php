@@ -14,7 +14,7 @@ class Company_model extends MY_Model {
         
         $key = "cm-companies-{$limit}-{$start}-{$order}-{$sort}";
         $data = $this->cache->get($key);
-        
+		
         if($data === FALSE)
         {
             $fields = $this->available_fields('company');
@@ -183,9 +183,86 @@ class Company_model extends MY_Model {
         return $data;
     }
     
-    function total_companies()
+    function search_companies($search, $limit=5, $start=0, $order='id', $sort='asc')
     {
-        return $this->db->count_all('company');
+		if(! $search)
+		{
+			return FALSE;
+		}
+		
+        $limit = $this->global_limit($limit);
+        $start = abs($start);
+        $order = $this->global_order($order, 'company');
+        $sort  = $this->global_sort($sort);
+        
+        $key = "cm-search-companies-{$search}-{$limit}-{$start}-{$order}-{$sort}";
+        $data = $this->cache->get($key);
+		
+        if($data === FALSE)
+        {
+			// where match
+			foreach(explode(' ', $search) as $str)
+			{
+				$this->db->or_like('code', $str, 'both');
+				$this->db->or_like('name', $str, 'both');
+			}
+			
+            $fields = $this->available_fields('company');
+            $get = $this->db->select($fields)
+                            ->order_by($order, $sort)
+                            ->limit($limit, $start)
+                            ->get('company');
+            
+            if($get && $get->num_rows())
+            {
+                $result = array();
+                foreach($get->result_array() as $row)
+                {
+                    if(isset($row['summary']))
+                    {
+                        $row['summary'] = json_decode($row['summary'], TRUE);
+                    }
+                    
+                    if(isset($row['description']))
+                    {
+                        $row['description'] = json_decode($row['description'], TRUE);
+                    }
+                    
+                    $result[] = $row;
+                }
+                
+                $this->cache->save($key, $result, CACHE_TIMER_COMPANIES);
+                return $result;
+            }
+            else
+            {
+                $this->cache->save($key, '', CACHE_TIMER_COMPANIES_NONE);
+                return FALSE;
+            }
+        }
+        
+        return $data;
+    }
+
+    function total_companies($config='')
+    {
+		if(! $config)
+		{
+			return $this->db->count_all('company');
+		}
+		else
+		{
+			if(isset($config['search']))
+			{
+				// where match
+				foreach(explode(' ', $config['search']) as $str)
+				{
+					$this->db->or_like('code', $str, 'both');
+					$this->db->or_like('name', $str, 'both');
+				}
+				return $this->db->count_all_results('company');
+			}			
+		}
     }
 
 }
